@@ -26,8 +26,7 @@ Note the [Makefile](./Makefile) is setup to compile using `g++`. Either ensure y
 - Build and run the executable through Valgrind: `make valgrind` (requires [Valgrind](https://valgrind.org/))
 - Build the API docs: `make docs` (requires [Doxygen](https://www.doxygen.nl/); find output in `docs` directory)
 
-## API documentation
-
 ## Copyright notice
+
 
 Copyright Finley Owen, 2026. All rights reserved.
