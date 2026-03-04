@@ -18,7 +18,7 @@
 #define NSQUARES 9
 
 /// Number of tests puzzles in the tests folder
-#define NTESTS 2
+#define NTESTS 4
 
 /// End of the first third of the puzzle
 #define T1 3
@@ -312,7 +312,7 @@ int main(void)
 		Puzzle puzzle = Puzzle::fromstream(file);
 
 		// validate puzzle
-		std::cout << "Validating puzzle:\n";
+		std::cout << "Validating puzzle " << i << ":\n";
 		puzzle.tostream(std::cout);
 		std::cout << std::endl;
 
@@ -332,10 +332,9 @@ int main(void)
 			std::cout << std::endl;
 		}
 		else
-		{
-			std::cout << "Couldn't find solution!\n";
-		}
+			throw std::runtime_error("Couldn't find solution!");
 
-		std::cout << "\n\n";
+		if (i <= NTESTS - 1)
+			std::cout << "\n\n";
 	}
 }
