@@ -5,19 +5,28 @@ VALGRIND = valgrind
 DOXYGEN = doxygen
 
 SRC = src/sudoku.cpp
-OUT = sudoku
+EXE = sudoku
 
-$(OUT): $(SRC)
-	$(CC) $(CFLAGS) -o $(OUT) $(SRC)
+$(EXE): $(SRC)
+	$(CC) $(CFLAGS) -o $(EXE) $(SRC)
 
-run: $(OUT)
-	./$(OUT)
+run_dfs: $(EXE)
+	./$(EXE) dfs
 
-valgrind: $(OUT)
-	$(VALGRIND) ./$(OUT)
+run_dfs_tracked: $(EXE)
+	./$(EXE) dfs_tracked
+
+run_bfs: $(EXE)
+	./$(EXE) bfs
+
+run_bfs_tracked: $(EXE)
+	./$(EXE) bfs_tracked
+
+valgrind: $(EXE)
+	$(VALGRIND) ./$(EXE)
 
 docs: $(SRC)
 	$(DOXYGEN) Doxyfile
 
-clean: $(OUT)
-	rm $(OUT)
+clean: $(EXE)
+	rm $(EXE)
