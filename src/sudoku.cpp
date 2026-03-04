@@ -22,7 +22,7 @@
 /// @brief End of the first third of the puzzle
 #define T1 3
 
-/// @brief End of the last third of the puzzle
+/// @brief End of the second third of the puzzle
 #define T2 6
 
 /// @brief The bounds of the subgrids; simply expands out to `{0, 3, 6, 9}`.

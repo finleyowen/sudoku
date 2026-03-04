@@ -28,5 +28,4 @@ Note the [Makefile](./Makefile) is setup to compile using `g++`. Either ensure y
 
 ## Copyright notice
 
-
 Copyright Finley Owen, 2026. All rights reserved.
