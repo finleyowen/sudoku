@@ -1,6 +1,6 @@
 # C++ sudoku solver
 
-**Under active development**
+**This project is under active development however the initial version is currently working.**
 
 A sudoku solver written in C++ using graphing algorithms on an implicit unweighted graph.
 
