@@ -12,19 +12,21 @@
 #include <iostream>
 #include <unordered_set>
 #include <vector>
+#include <optional>
 
-/// The number of squares on the board
+/// The number of squares on the puzzle
 #define NSQUARES 9
 
 /// Number of tests puzzles in the tests folder
 #define NTESTS 2
 
-/// End of the first third of the board
+/// End of the first third of the puzzle
 #define T1 3
 
-/// End of the last third of the board
+/// End of the last third of the puzzle
 #define T2 6
 
+/// @brief The bounds of the subgrids; simply expands out to `{0, 3, 6, 9}`.
 constexpr int subgrid_bounds[] = {0, T1, T2, NSQUARES};
 
 /// @brief A nullable integer between 1 and 9; represents the value inside a
@@ -44,7 +46,7 @@ enum class SquareValue
 	TEN = 10
 };
 
-/// @brief Represents a square on the board.
+/// @brief Represents a square on the puzzle.
 class Square
 {
 private:
@@ -84,13 +86,13 @@ public:
 	}
 };
 
-/// @brief Represents a Sudoke board state.
-class SudokuBoard
+/// @brief Represents a Sudoke puzzle state.
+class Puzzle
 {
 private:
 	Square squares[NSQUARES][NSQUARES];
 
-	SudokuBoard(Square squares[NSQUARES][NSQUARES])
+	Puzzle(Square squares[NSQUARES][NSQUARES])
 	{
 		memcpy(this->squares, squares, NSQUARES * NSQUARES * sizeof(Square));
 	}
@@ -169,7 +171,7 @@ private:
 	}
 
 public:
-	static SudokuBoard
+	static Puzzle
 	fromstream(std::istream &stream)
 	{
 		Square squares[NSQUARES][NSQUARES];
@@ -190,7 +192,7 @@ public:
 			stream.ignore(1, '\n');
 		}
 
-		return SudokuBoard(squares);
+		return Puzzle(squares);
 	}
 
 	void tostream(std::ostream &os)
@@ -213,11 +215,11 @@ public:
 		}
 	}
 
-	SudokuBoard clone()
+	Puzzle clone()
 	{
 		Square newSquares[NSQUARES][NSQUARES];
 		memcpy(newSquares, squares, sizeof(newSquares));
-		return SudokuBoard(newSquares);
+		return Puzzle(newSquares);
 	}
 
 	bool isvalid()
@@ -246,15 +248,15 @@ public:
 		return true;
 	}
 
-	std::vector<SudokuBoard> getneighbours()
+	std::vector<Puzzle> getneighbours()
 	{
-		std::vector<SudokuBoard> neighbours;
+		std::vector<Puzzle> neighbours;
 		for (int i = 0; i < NSQUARES; i++)
 			for (int j = 0; j < NSQUARES; j++)
 				if (squares[i][j].isunset())
 					for (int k = 1; k <= NSQUARES; k++)
 					{
-						SudokuBoard neighbour = clone();
+						Puzzle neighbour = clone();
 						neighbour.squares[i][j].setintval(k);
 
 						if (neighbour.isvalid())
@@ -263,6 +265,39 @@ public:
 		return neighbours;
 	}
 };
+
+std::optional<Puzzle> solve(Puzzle *puzzle)
+{
+	// invalid puzzles shouldn't be passed to this funciton
+	if (!puzzle->isvalid())
+	{
+		throw std::runtime_error("Couldn't solve invalid puzzle!");
+	}
+
+	// already checked the puzzle is valid, so if it's full we're done
+	if (puzzle->isfull())
+		return *puzzle;
+
+	// recursively solve the puzzle
+	std::vector<Puzzle> neighbours = puzzle->getneighbours();
+
+	// base case: no neighbours => no solution
+	if (!neighbours.size())
+		return std::nullopt;
+
+	// recursive case: check if neighbours have solutions
+	for (long unsigned int i = 0; i < neighbours.size(); i++)
+	{
+		std::optional<Puzzle> soln = solve(&neighbours[i]);
+		if (soln.has_value())
+		{
+			return soln;
+		}
+	}
+
+	// no solution in recursive tree
+	return std::nullopt;
+}
 
 int main(void)
 {
@@ -273,32 +308,34 @@ int main(void)
 		fname << "./tests/test" << i;
 		std::ifstream file(fname.str());
 
-		// parse sudoku board
-		SudokuBoard board = SudokuBoard::fromstream(file);
+		// parse sudoku puzzle
+		Puzzle puzzle = Puzzle::fromstream(file);
 
-		// validate board
-		std::cout << "Validating board:\n";
-		board.tostream(std::cout);
+		// validate puzzle
+		std::cout << "Validating puzzle:\n";
+		puzzle.tostream(std::cout);
 		std::cout << std::endl;
 
-		if (!board.isvalid())
+		if (!puzzle.isvalid())
 		{
-			throw std::runtime_error("The board was invalid!");
+			throw std::runtime_error("The puzzle was invalid!");
 		}
 
-		// find neighbours
-		std::cout << "The board was valid!\nFinding neighbours.\n";
+		// find solution
+		std::cout << "The puzzle was valid!\nSolving it now.\n";
+		std::optional<Puzzle> soln = solve(&puzzle);
 
-		std::vector<SudokuBoard>
-			neighbours = board.getneighbours();
-
-		for (long unsigned int i = 0; i < neighbours.size(); i++)
+		if (soln.has_value())
 		{
-			std::cout << "Neighbour " << i + 1 << std::endl;
-			neighbours[i].tostream(std::cout);
+			std::cout << "Found solution:\n";
+			soln->tostream(std::cout);
 			std::cout << std::endl;
 		}
+		else
+		{
+			std::cout << "Couldn't find solution!\n";
+		}
 
-		std::cout << "Finished finding neighbours.\n\n\n";
+		std::cout << "\n\n";
 	}
 }
