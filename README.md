@@ -13,14 +13,20 @@ To add your own test puzzle, add a new file to this directory ensuring the filen
 Puzzles are represented textually with columns separated by whitespaces and rows separated
 by newlines. Blank cells are represented using the character `x`. See examples in the [test folder](./tests)
 
+## Documentation
+
+Comprehensive API documentation has been written using Doxygen-style doc comments. It can be generated from the repository by running `make docs` from the root directory.
+
 ## Building from source
 
-Note the [Makefile](./Makefile) is setup to compile using `g++`. Either ensure you have it installed or edit the [Makefile](./Makefile) to use your desired C++ compiler. Then, choose from one of the following options:
+Note the [Makefile](./Makefile) is setup to compile using `g++`. Either ensure you have it installed or edit the Makefile to use your desired C++ compiler. Then, choose from one of the following options:
 
 - Build the executable: `make`
 - Build and run the executable: `make run`
-- Build and run the executable through Valgrind (requires [Valgrind](https://valgrind.org/)): `make run valgrind`
-- Build the API docs: `make docs` (find output in `docs` directory)
+- Build and run the executable through Valgrind: `make valgrind` (requires [Valgrind](https://valgrind.org/))
+- Build the API docs: `make docs` (requires [Doxygen](https://www.doxygen.nl/); find output in `docs` directory)
+
+## API documentation
 
 ## Copyright notice
 
