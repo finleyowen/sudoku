@@ -12,6 +12,7 @@
 #include <unordered_set>
 #include <vector>
 #include <optional>
+#include <list>
 
 /// @brief The number of cells in each row and each column
 #define NCELLS 9
@@ -82,7 +83,8 @@ public:
 	}
 };
 
-/// @brief Represents a Sudoku puzzle state.
+/// @brief Represents a Sudoku puzzle state. Also represents a vertex in the
+/// 	implicit graph.
 class Puzzle
 {
 private:
@@ -281,6 +283,24 @@ public:
 		return neighbours;
 	}
 
+	/// @brief Append the neighbouring nodes to this node in the implicit graph
+	/// 	to the back of the queue `q`.
+	/// @param q The queue to append the neighbouring nodes to.
+	void enqueue_neighbours(std::list<Puzzle> &q)
+	{
+		for (int i = 0; i < NCELLS; i++)
+			for (int j = 0; j < NCELLS; j++)
+				if (cells[i][j].is_empty())
+					for (int k = 1; k <= NCELLS; k++)
+					{
+						Puzzle neighbour = clone();
+						neighbour.cells[i][j].set_intval(k);
+
+						if (neighbour.is_valid())
+							q.push_back(neighbour);
+					}
+	}
+
 	bool operator==(const Puzzle &other) const
 	{
 		return memcmp(cells, other.cells, NCELLS * NCELLS * sizeof(Cell)) == 0;
@@ -288,39 +308,68 @@ public:
 };
 
 /// @brief Solve a puzzle using recursive DFS.
-/// @param puzzle The puzzle to solve.
+/// @param puzzle The puzzle to solve (the source node in the DFS).
 /// @return The solved puzzle, or `std::nullopt` if the puzzle couldn't be
 /// 	solved
-std::optional<Puzzle> dfs(Puzzle &puzzle)
+std::optional<Puzzle> dfs(Puzzle &u)
 {
-	// invalid puzzles shouldn't be passed to this funciton
-	if (!puzzle.is_valid())
-	{
+	// invalid puzzles shouldn't be passed to this function
+	if (!u.is_valid())
 		throw std::runtime_error("Couldn't solve invalid puzzle!");
-	}
 
 	// already checked the puzzle is valid, so if it's full we're done
-	if (puzzle.is_full())
-		return puzzle;
+	if (u.is_full())
+		return u;
 
 	// recursively solve the puzzle
-	std::vector<Puzzle> neighbours = puzzle.get_neighbours();
+	auto neighbours = u.get_neighbours();
 
 	// base case: no neighbours => no solution
 	if (!neighbours.size())
 		return std::nullopt;
 
 	// recursive case: check if neighbours have solutions
-	for (long unsigned int i = 0; i < neighbours.size(); i++)
+	for (auto v : neighbours)
 	{
-		std::optional<Puzzle> soln = dfs(neighbours[i]);
+		auto soln = dfs(v);
 		if (soln.has_value())
-		{
 			return soln;
-		}
 	}
 
 	// no solution in recursive tree
+	return std::nullopt;
+}
+
+/// @brief Solve a puzzle using queue-based BFS.
+/// @param u The puzzle to solve (the source node in the BFS).
+/// @return The solved puzzle, or `std::nullopt` if the puzzle couldn't be
+/// 	solved
+std::optional<Puzzle> bfs(Puzzle &u)
+{
+	// create the queue and add the source node
+	std::list<Puzzle> q;
+	q.push_back(u);
+
+	// loop while the queue has elements
+	while (!q.empty())
+	{
+		// pop a node from the front of the queue
+		auto v = q.front();
+		q.pop_front();
+
+		// invalid puzzles shouldn't be passed to this function
+		if (!v.is_valid())
+			throw std::runtime_error("Couldn't solve invalid puzzle!");
+
+		// already checked the puzzle is valid, so if it's full we're done
+		if (v.is_full())
+			return v;
+
+		// enqueue neighbours for searching
+		v.enqueue_neighbours(q);
+	}
+
+	// couldn't solve puzzle
 	return std::nullopt;
 }
 
@@ -349,7 +398,7 @@ int main(void)
 
 		// find solution
 		std::cout << "The puzzle was valid!\nSolving it now.\n";
-		std::optional<Puzzle> output = dfs(puzzle);
+		std::optional<Puzzle> output = bfs(puzzle);
 
 		if (output.has_value())
 		{
@@ -379,9 +428,11 @@ int main(void)
 		}
 		else
 			// no solution was found
-			throw std::runtime_error("Couldn't find solution!");
+			throw std::runtime_error("++ution!");
 
 		if (i <= NTESTS - 1)
 			std::cout << "\n\n";
 	}
 }
+
+//
