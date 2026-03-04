@@ -11,12 +11,13 @@
 #include <fstream>
 #include <iostream>
 #include <unordered_set>
+#include <vector>
 
 /// The number of squares on the board
 #define NSQUARES 9
 
 /// Number of tests puzzles in the tests folder
-#define NTESTS 1
+#define NTESTS 2
 
 /// End of the first third of the board
 #define T1 3
@@ -169,7 +170,7 @@ private:
 
 public:
 	static SudokuBoard
-	fromistream(std::istream &stream)
+	fromstream(std::istream &stream)
 	{
 		Square squares[NSQUARES][NSQUARES];
 
@@ -181,7 +182,7 @@ public:
 				stream >> c;
 				stream.ignore(1, ' ');
 
-				int val = c == ' ' ? 0 : c - '0';
+				int val = c == 'x' ? 0 : c - '0';
 
 				squares[i][j].setintval(val);
 			}
@@ -192,19 +193,24 @@ public:
 		return SudokuBoard(squares);
 	}
 
-	std::ostringstream toostream()
+	void tostream(std::ostream &os)
 	{
-		std::ostringstream ss;
 		for (int i = 0; i < NSQUARES; i++)
 		{
 			for (int j = 0; j < NSQUARES; j++)
-				ss << squares[i][j].getintval() << ' ';
+			{
+				int intval = squares[i][j].getintval();
+				if (intval == 0)
+					std::cout << 'x';
+				else
+					std::cout << intval;
+				std::cout << ' ';
+			}
 
 			// no newline after last row
 			if (i < NSQUARES - 1)
-				ss << std::endl;
+				os << std::endl;
 		}
-		return ss;
 	}
 
 	SudokuBoard clone()
@@ -239,34 +245,60 @@ public:
 					return false;
 		return true;
 	}
+
+	std::vector<SudokuBoard> getneighbours()
+	{
+		std::vector<SudokuBoard> neighbours;
+		for (int i = 0; i < NSQUARES; i++)
+			for (int j = 0; j < NSQUARES; j++)
+				if (squares[i][j].isunset())
+					for (int k = 1; k <= NSQUARES; k++)
+					{
+						SudokuBoard neighbour = clone();
+						neighbour.squares[i][j].setintval(k);
+
+						if (neighbour.isvalid())
+							neighbours.push_back(neighbour);
+					}
+		return neighbours;
+	}
 };
 
 int main(void)
 {
 	for (int i = 1; i <= NTESTS; i++)
 	{
-		std::ostringstream fnameSS;
-		fnameSS << "./tests/test" << i;
+		// load file
+		std::ostringstream fname;
+		fname << "./tests/test" << i;
+		std::ifstream file(fname.str());
 
-		std::ifstream file(fnameSS.str());
+		// parse sudoku board
+		SudokuBoard board = SudokuBoard::fromstream(file);
 
-		SudokuBoard board = SudokuBoard::fromistream(file);
-
-		std::cout << "Validating board:\n"
-				  << board.toostream().str() << std::endl;
+		// validate board
+		std::cout << "Validating board:\n";
+		board.tostream(std::cout);
+		std::cout << std::endl;
 
 		if (!board.isvalid())
 		{
 			throw std::runtime_error("The board was invalid!");
 		}
 
-		std::cout << "Validated successfully!\nChecking board is full.\n";
+		// find neighbours
+		std::cout << "The board was valid!\nFinding neighbours.\n";
 
-		if (!board.isfull())
+		std::vector<SudokuBoard>
+			neighbours = board.getneighbours();
+
+		for (long unsigned int i = 0; i < neighbours.size(); i++)
 		{
-			throw std::runtime_error("The board was not full!");
+			std::cout << "Neighbour " << i + 1 << std::endl;
+			neighbours[i].tostream(std::cout);
+			std::cout << std::endl;
 		}
 
-		std::cout << "The board is full.\n";
+		std::cout << "Finished finding neighbours.\n\n\n";
 	}
 }
