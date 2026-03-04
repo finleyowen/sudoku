@@ -230,6 +230,15 @@ public:
 
 		return true;
 	}
+
+	bool isfull()
+	{
+		for (int i = 0; i < NSQUARES; i++)
+			for (int j = 0; j < NSQUARES; j++)
+				if (squares[i][j].isunset())
+					return false;
+		return true;
+	}
 };
 
 int main(void)
@@ -251,6 +260,13 @@ int main(void)
 			throw std::runtime_error("The board was invalid!");
 		}
 
-		std::cout << "Validated successfully!\n";
+		std::cout << "Validated successfully!\nChecking board is full.\n";
+
+		if (!board.isfull())
+		{
+			throw std::runtime_error("The board was not full!");
+		}
+
+		std::cout << "The board is full.\n";
 	}
 }
