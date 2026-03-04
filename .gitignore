@@ -1,4 +1,5 @@
 # executable
 sudoku
 
-doc/**/*
+# docs
+docs/**/*
