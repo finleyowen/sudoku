@@ -4,6 +4,11 @@
 
 A sudoku solver written in C++ using graphing algorithms on an implicit unweighted graph.
 
+## Writing puzzles
+
+Puzzles are represented by strings with columns separated by whitespaces and rows separated
+by newlines. Blank cells are represented using the character `x`. See examples [here](./tests)
+
 ## Building from source
 
 1. Clone the repository:

@@ -18,7 +18,7 @@
 #define NSQUARES 9
 
 /// Number of tests puzzles in the tests folder
-#define NTESTS 4
+#define NTESTS 5
 
 /// End of the first third of the puzzle
 #define T1 3
