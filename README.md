@@ -11,7 +11,7 @@ Currently, the program iterates over the test puzzles in the [test folder](./tes
 To add your own test puzzle, add a new file to this directory ensuring the filename copies the format of the other test puzzles (`test{i}` with no file extension), then edit the value of `NTESTS` in [sudoku.cpp](./src/sudoku.cpp) accordingly. 
 
 Puzzles are represented textually with columns separated by whitespaces and rows separated
-by newlines. Blank cells are represented using the character `x`. See examples in the [test folder](./tests)
+by newlines. Blank cells are represented using the character `x`. The puzzle must be preceded by a line beginning with a dash (`-`); everyhing before this line is a header comment describing the puzzle. See examples in the [test folder](./tests)
 
 ## Documentation
 

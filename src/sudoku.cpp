@@ -13,11 +13,11 @@
 #include <vector>
 #include <optional>
 
-/// @brief The number of squares on the puzzle
-#define NSQUARES 9
+/// @brief The number of cells in each row and each column
+#define NCELLS 9
 
 /// @brief Number of tests puzzles in the tests folder
-#define NTESTS 5
+#define NTESTS 6
 
 /// @brief End of the first third of the puzzle
 #define T1 3
@@ -26,7 +26,7 @@
 #define T2 6
 
 /// @brief The bounds of the subgrids; simply expands out to `{0, 3, 6, 9}`.
-constexpr int subgrid_bounds[] = {0, T1, T2, NSQUARES};
+constexpr int subgrid_bounds[] = {0, T1, T2, NCELLS};
 
 /// @brief A nullable integer between 1 and 9; represents the value inside a
 ///		cell.
@@ -73,12 +73,12 @@ public:
 
 	/// @brief Set the value given an integer.
 	/// @param value The new value as an integer
-	void setintval(int value)
+	void set_intval(int value)
 	{
-		if (value >= 0 && value <= NSQUARES)
-		{
+		if (value >= 0 && value <= NCELLS)
 			this->value = static_cast<CellValue>(value);
-		}
+		else
+			throw std::runtime_error("Invalid value!");
 	}
 };
 
@@ -86,22 +86,22 @@ public:
 class Puzzle
 {
 private:
-	Cell squares[NSQUARES][NSQUARES];
+	Cell cells[NCELLS][NCELLS];
 
-	Puzzle(Cell squares[NSQUARES][NSQUARES])
+	Puzzle(Cell cells[NCELLS][NCELLS])
 	{
-		memcpy(this->squares, squares, NSQUARES * NSQUARES * sizeof(Cell));
+		memcpy(this->cells, cells, NCELLS * NCELLS * sizeof(Cell));
 	}
 
 	bool validate_row(int i)
 	{
 		std::unordered_set<int> vals;
 
-		for (int j = 0; j < NSQUARES; j++)
+		for (int j = 0; j < NCELLS; j++)
 		{
-			Cell *sq = &squares[i][j];
+			Cell *sq = &cells[i][j];
 
-			// ignore unset squares
+			// ignore unset cells
 			if (!sq->is_empty())
 			{
 				if (vals.count(sq->get_intval()))
@@ -120,11 +120,11 @@ private:
 	{
 		std::unordered_set<int> vals;
 
-		for (int i = 0; i < NSQUARES; i++)
+		for (int i = 0; i < NCELLS; i++)
 		{
-			Cell *sq = &squares[i][j];
+			Cell *sq = &cells[i][j];
 
-			// ignore unset squares
+			// ignore unset cells
 			if (!sq->is_empty())
 			{
 				if (vals.count(sq->get_intval()))
@@ -146,9 +146,9 @@ private:
 		for (int i = start_i; i < end_i; i++)
 			for (int j = start_j; j < end_j; j++)
 			{
-				Cell *sq = &squares[i][j];
+				Cell *sq = &cells[i][j];
 
-				// ignore unset squares
+				// ignore unset cells
 				if (!sq->is_empty())
 				{
 					if (vals.count(sq->get_intval()))
@@ -163,9 +163,9 @@ private:
 
 	Puzzle clone()
 	{
-		Cell newSquares[NSQUARES][NSQUARES];
-		memcpy(newSquares, squares, sizeof(newSquares));
-		return Puzzle(newSquares);
+		Cell newCells[NCELLS][NCELLS];
+		memcpy(newCells, cells, NCELLS * NCELLS * sizeof(Cell));
+		return Puzzle(newCells);
 	}
 
 public:
@@ -175,11 +175,15 @@ public:
 	static Puzzle
 	from_stream(std::istream &stream)
 	{
-		Cell squares[NSQUARES][NSQUARES];
+		Cell cells[NCELLS][NCELLS];
 
-		for (int i = 0; i < NSQUARES; i++)
+		std::string line;
+		while (std::getline(stream, line) && line[0] != '-')
+			;
+
+		for (int i = 0; i < NCELLS; i++)
 		{
-			for (int j = 0; j < NSQUARES; j++)
+			for (int j = 0; j < NCELLS; j++)
 			{
 				char c;
 				stream >> c;
@@ -187,24 +191,29 @@ public:
 
 				int val = c == 'x' ? 0 : c - '0';
 
-				squares[i][j].setintval(val);
+				cells[i][j].set_intval(val);
 			}
 
 			stream.ignore(1, '\n');
 		}
 
-		return Puzzle(squares);
+		auto puzzle = Puzzle(cells);
+		if (!puzzle.is_valid())
+			throw std::runtime_error("Invalid puzzle!");
+
+		return puzzle;
 	}
 
 	/// @brief Output the puzzle to an output stream.
 	/// @param stream Output stream to output the puzzle to.
 	void to_stream(std::ostream &stream)
 	{
-		for (int i = 0; i < NSQUARES; i++)
+		for (int i = 0; i < NCELLS; i++)
 		{
-			for (int j = 0; j < NSQUARES; j++)
+			std::cout << i + 1 << ": ";
+			for (int j = 0; j < NCELLS; j++)
 			{
-				int intval = squares[i][j].get_intval();
+				int intval = cells[i][j].get_intval();
 				if (intval == 0)
 					std::cout << 'x';
 				else
@@ -213,7 +222,7 @@ public:
 			}
 
 			// no newline after last row
-			if (i < NSQUARES - 1)
+			if (i < NCELLS - 1)
 				stream << std::endl;
 		}
 	}
@@ -223,7 +232,7 @@ public:
 	bool is_valid()
 	{
 		// check each row and column
-		for (int i = 0; i < NSQUARES; i++)
+		for (int i = 0; i < NCELLS; i++)
 			if (!(validate_row(i) && validate_col(i)))
 				return false;
 
@@ -244,9 +253,9 @@ public:
 	///		must return `true`.
 	bool is_full()
 	{
-		for (int i = 0; i < NSQUARES; i++)
-			for (int j = 0; j < NSQUARES; j++)
-				if (squares[i][j].is_empty())
+		for (int i = 0; i < NCELLS; i++)
+			for (int j = 0; j < NCELLS; j++)
+				if (cells[i][j].is_empty())
 					return false;
 		return true;
 	}
@@ -255,21 +264,26 @@ public:
 	///		by altering the value in 1 empty cell in the puzzle. These are the
 	/// 	neighbouring nodes in the implicit graph.
 	/// @return The neighbouring nodes in the implicit grapb.
-	std::vector<Puzzle> getneighbours()
+	std::vector<Puzzle> get_neighbours()
 	{
 		std::vector<Puzzle> neighbours;
-		for (int i = 0; i < NSQUARES; i++)
-			for (int j = 0; j < NSQUARES; j++)
-				if (squares[i][j].is_empty())
-					for (int k = 1; k <= NSQUARES; k++)
+		for (int i = 0; i < NCELLS; i++)
+			for (int j = 0; j < NCELLS; j++)
+				if (cells[i][j].is_empty())
+					for (int k = 1; k <= NCELLS; k++)
 					{
 						Puzzle neighbour = clone();
-						neighbour.squares[i][j].setintval(k);
+						neighbour.cells[i][j].set_intval(k);
 
 						if (neighbour.is_valid())
 							neighbours.push_back(neighbour);
 					}
 		return neighbours;
+	}
+
+	bool operator==(const Puzzle &other) const
+	{
+		return memcmp(cells, other.cells, NCELLS * NCELLS * sizeof(Cell)) == 0;
 	}
 };
 
@@ -277,20 +291,20 @@ public:
 /// @param puzzle The puzzle to solve.
 /// @return The solved puzzle, or `std::nullopt` if the puzzle couldn't be
 /// 	solved
-std::optional<Puzzle> dfs(Puzzle *puzzle)
+std::optional<Puzzle> dfs(Puzzle &puzzle)
 {
 	// invalid puzzles shouldn't be passed to this funciton
-	if (!puzzle->is_valid())
+	if (!puzzle.is_valid())
 	{
 		throw std::runtime_error("Couldn't solve invalid puzzle!");
 	}
 
 	// already checked the puzzle is valid, so if it's full we're done
-	if (puzzle->is_full())
-		return *puzzle;
+	if (puzzle.is_full())
+		return puzzle;
 
 	// recursively solve the puzzle
-	std::vector<Puzzle> neighbours = puzzle->getneighbours();
+	std::vector<Puzzle> neighbours = puzzle.get_neighbours();
 
 	// base case: no neighbours => no solution
 	if (!neighbours.size())
@@ -299,7 +313,7 @@ std::optional<Puzzle> dfs(Puzzle *puzzle)
 	// recursive case: check if neighbours have solutions
 	for (long unsigned int i = 0; i < neighbours.size(); i++)
 	{
-		std::optional<Puzzle> soln = dfs(&neighbours[i]);
+		std::optional<Puzzle> soln = dfs(neighbours[i]);
 		if (soln.has_value())
 		{
 			return soln;
@@ -315,13 +329,13 @@ int main(void)
 {
 	for (int i = 1; i <= NTESTS; i++)
 	{
-		// load file
-		std::ostringstream fname;
-		fname << "./tests/test" << i;
-		std::ifstream file(fname.str());
+		// load input file
+		std::ostringstream infile_name;
+		infile_name << "./tests/inputs/input" << i;
+		std::ifstream infile(infile_name.str());
 
-		// parse sudoku puzzle
-		Puzzle puzzle = Puzzle::from_stream(file);
+		// parse puzzle
+		Puzzle puzzle = Puzzle::from_stream(infile);
 
 		// validate puzzle
 		std::cout << "Validating puzzle " << i << ":\n";
@@ -335,15 +349,36 @@ int main(void)
 
 		// find solution
 		std::cout << "The puzzle was valid!\nSolving it now.\n";
-		std::optional<Puzzle> soln = dfs(&puzzle);
+		std::optional<Puzzle> output = dfs(puzzle);
 
-		if (soln.has_value())
+		if (output.has_value())
 		{
-			std::cout << "Found solution:\n";
-			soln->to_stream(std::cout);
-			std::cout << std::endl;
+			// a solution was found
+
+			// load expected output from file to puzzle
+			std::ostringstream outfile_name;
+			outfile_name << "./tests/outputs/output" << i;
+
+			std::ifstream outfile(outfile_name.str());
+
+			std::optional<Puzzle> expected = Puzzle::from_stream(outfile);
+
+			if (!expected.has_value())
+				throw std::runtime_error("Couldn't parse expected output!");
+
+			if (output == expected)
+				// if the expected solution was found
+				std::cout << "Found expected solution!" << std::endl;
+			else
+			{
+				// an unexpected solution was found
+				std::cout << "Found unexpected solution:\n";
+				output->to_stream(std::cout);
+				// throw std::runtime_error("Found unexpected solution!");
+			}
 		}
 		else
+			// no solution was found
 			throw std::runtime_error("Couldn't find solution!");
 
 		if (i <= NTESTS - 1)
