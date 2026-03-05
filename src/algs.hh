@@ -33,6 +33,12 @@ std::optional<Puzzle> dfs_tracked(Puzzle &u,
 /// @return The solved puzzle, or `std::nullopt` if the puzzle couldn't be solved.
 std::optional<Puzzle> dfs_spec(Puzzle &u, size_t &nodes_explored);
 
+/// @brief Solve a puzzle using stack-based DFS.
+/// @param u The puzzle to solve (the source node in the DFS).
+/// @param nodes_explored The number of nodes explored.
+/// @return The solved puzzle, or `std::nullopt` if the puzzle couldn't be solved.
+std::optional<Puzzle> dfs_stack(Puzzle &u, size_t &nodes_explored);
+
 /// @brief Solve a puzzle using queue-based BFS.
 /// @param u The puzzle to solve (the source node in the BFS).
 /// @param nodes_explored The number of nodes explored.

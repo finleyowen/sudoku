@@ -35,7 +35,7 @@ constexpr int subgrid_bounds[] = {0, T1, T2, NCELLS};
 
 /// @brief A nullable integer between 1 and 9; represents the value inside a
 ///		cell.
-enum class CellValue
+enum class CellValue : u_int8_t
 {
 	/// @brief Describes the value of a cell that is empty.
 	UNSET = 0,
@@ -73,6 +73,8 @@ public:
 	/// @brief Set the value given an integer.
 	/// @param value The new value as an integer
 	void set_intval(int value);
+
+	bool operator==(Cell other);
 };
 
 /// @brief Represents a Sudoku puzzle state. Also represents a vertex in the
@@ -81,6 +83,7 @@ class Puzzle
 {
 private:
 	Cell cells[NCELLS][NCELLS];
+	bool solid[NCELLS][NCELLS];
 
 	Puzzle(Cell cells[NCELLS][NCELLS]);
 
@@ -106,9 +109,9 @@ public:
 	/// @brief Get a bool indicating whether all cells are filled.
 	/// @return A bool indicating whether all cells are filled.
 	/// @note This method doesn't check for validity. For the puzzle to be
-	///		complete, both \ref Puzzle::is_valid and \ref Puzzle::is_full
+	///		complete, both \ref Puzzle::is_valid and \ref Puzzle::is_complete
 	///		must return `true`.
-	bool is_full();
+	bool is_complete();
 
 	/// @brief Get a vector containing the puzzle states that can be achieved
 	///		by altering the value in 1 empty cell in the puzzle. These are the
@@ -134,6 +137,13 @@ public:
 	/// @return
 	std::optional<Puzzle> get_next_state();
 
+	/// @brief Returns a boolean indicating whether `soln` is the solution to
+	/// 	this puzzle.
+	/// @param soln The supposed solution.
+	/// @return A boolean indicating whether `soln` is the solution to this
+	/// 	puzzle.
+	bool solved_by(Puzzle &soln);
+
 	bool
 	operator==(const Puzzle &other) const;
 };
@@ -153,3 +163,5 @@ namespace std
 		}
 	};
 }
+
+std::runtime_error invalid_puzzle_error(Puzzle &p);

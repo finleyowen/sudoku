@@ -2,7 +2,7 @@
 
 A sudoku solver written in C++ using graphing algorithms on an implicit unweighted graph.
 
-**This project is under active development. It is currently working, however all the algorithms are extremely slow and none have been successfully executed on test 7 ([input](./tests/inputs/input7), [output](./tests/outputs/output7)) or test 8 ([input](./tests/inputs/input8), [output](./tests/outputs/output8)) yet for this reason.**
+**This project is under active development. It is currently working, however most the algorithms are very slow and none have been successfully executed on all of the tests yet for this reason. The stack-based DFS seems to be the fastest of the algorithms currently implemented.**
 
 ## Overview and usage
 
@@ -10,6 +10,7 @@ The algorithms currently implemented are:
 - `dfs` - depth-first search
 - `dfs_tracked` - depth-first search that avoids exploring duplicate states
 - `dfs_spec` - specialised depth-first search that only explores states that are guaranteed to be closer to the solution that the current state assuming the current state is valid and solvable
+- `dfs_stack` - stack-based depth-first search that only explores states unique states
 - `bfs` - breadth-first search
 - `bfs_tracked` - breadth-first search that avoids exploring duplicate states
 

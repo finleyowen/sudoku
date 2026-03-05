@@ -26,7 +26,16 @@ void Cell::set_intval(int value)
 	if (value >= 0 && value <= NCELLS)
 		this->value = static_cast<CellValue>(value);
 	else
-		throw std::runtime_error("Invalid value!");
+	{
+		std::ostringstream ss;
+		ss << "Invalid value " << value << "!\n";
+		throw std::runtime_error(ss.str());
+	}
+}
+
+bool Cell::operator==(Cell other)
+{
+	return value == other.value;
 }
 
 // =============================================================================
@@ -36,6 +45,9 @@ void Cell::set_intval(int value)
 Puzzle::Puzzle(Cell cells[NCELLS][NCELLS])
 {
 	memcpy(this->cells, cells, NCELLS * NCELLS * sizeof(Cell));
+	for (int i = 0; i < NCELLS; i++)
+		for (int j = 0; j < NCELLS; j++)
+			solid[i][j] = !cells[i][j].is_empty();
 }
 
 bool Puzzle::validate_row(int i)
@@ -132,7 +144,7 @@ Puzzle Puzzle::from_stream(std::istream &stream)
 
 	auto puzzle = Puzzle(cells);
 	if (!puzzle.is_valid())
-		throw std::runtime_error("Invalid puzzle!");
+		throw invalid_puzzle_error(puzzle);
 
 	return puzzle;
 }
@@ -141,7 +153,6 @@ void Puzzle::to_stream(std::ostream &stream) const
 {
 	for (int i = 0; i < NCELLS; i++)
 	{
-		stream << i + 1 << ": ";
 		for (int j = 0; j < NCELLS; j++)
 		{
 			int intval = cells[i][j].get_intval();
@@ -175,7 +186,7 @@ bool Puzzle::is_valid()
 	return true;
 }
 
-bool Puzzle::is_full()
+bool Puzzle::is_complete()
 {
 	for (int i = 0; i < NCELLS; i++)
 		for (int j = 0; j < NCELLS; j++)
@@ -189,7 +200,7 @@ std::vector<Puzzle> Puzzle::get_neighbours()
 	std::vector<Puzzle> neighbours;
 	for (int i = 0; i < NCELLS; i++)
 		for (int j = 0; j < NCELLS; j++)
-			if (cells[i][j].is_empty())
+			if (!solid[i][j])
 				for (int k = 1; k <= NCELLS; k++)
 				{
 					Puzzle neighbour = clone();
@@ -265,7 +276,31 @@ std::unordered_set<int> Puzzle::get_invalid(int i, int j)
 	return invalid;
 }
 
+bool Puzzle::solved_by(Puzzle &soln)
+{
+	// check that all the non-nulled cells in this puzzle are the same in the
+	// solution
+	for (int i = 0; i < NCELLS; i++)
+		for (int j = 0; j < NCELLS; j++)
+			if (!cells[i][j].is_empty() && !(cells[i][j] == soln.cells[i][j]))
+				return false;
+
+	// check the solution is complete and valid
+	return soln.is_valid() && soln.is_complete();
+}
+
 bool Puzzle::operator==(const Puzzle &other) const
 {
 	return memcmp(cells, other.cells, NCELLS * NCELLS * sizeof(Cell)) == 0;
 }
+
+std::runtime_error invalid_puzzle_error(Puzzle &p)
+{
+	std::ostringstream ss;
+	ss << "Invalid puzzle:\n";
+	p.to_stream(ss);
+	ss << std::endl;
+	return std::runtime_error(ss.str());
+}
+
+//

@@ -14,10 +14,10 @@ std::optional<Puzzle> dfs(Puzzle &u, size_t &nodes_explored)
 
 	// invalid puzzles shouldn't be passed to this function
 	if (!u.is_valid())
-		throw std::runtime_error("Couldn't solve invalid puzzle!");
+		throw invalid_puzzle_error(u);
 
 	// already checked the puzzle is valid, so if it's full we're done
-	if (u.is_full())
+	if (u.is_complete())
 		return u;
 
 	// recursively solve the puzzle
@@ -48,10 +48,10 @@ std::optional<Puzzle> dfs_tracked(Puzzle &u,
 
 	// invalid puzzles shouldn't be passed to this function
 	if (!u.is_valid())
-		throw std::runtime_error("Couldn't solve invalid puzzle!");
+		throw invalid_puzzle_error(u);
 
 	// already checked the puzzle is valid, so if it's full we're done
-	if (u.is_full())
+	if (u.is_complete())
 		return u;
 
 	// recursively solve the puzzle
@@ -87,10 +87,10 @@ std::optional<Puzzle> dfs_spec(Puzzle &u, size_t &nodes_explored)
 
 	// invalid puzzles shouldn't be passed to this function
 	if (!u.is_valid())
-		throw std::runtime_error("Couldn't solve invalid puzzle!");
+		throw;
 
 	// already checked the puzzle is valid, so if it's full we're done
-	if (u.is_full())
+	if (u.is_complete())
 		return u;
 
 	// =========================================================================
@@ -98,14 +98,11 @@ std::optional<Puzzle> dfs_spec(Puzzle &u, size_t &nodes_explored)
 	// to solved than the current puzzle state u assuming u is valid and
 	// solvable, replace u with v
 	std::optional<Puzzle> v = u;
-	while ((v = u.get_next_state()) != std::nullopt)
+	while ((v = u.get_next_state()).has_value())
 	{
-		std::cout << "Found better state!\n";
 		u = *v;
 	}
 	// =========================================================================
-
-	std::cout << "Finished analysing better states\n";
 
 	// recursively solve the puzzle
 	auto neighbours = u.get_neighbours();
@@ -123,6 +120,37 @@ std::optional<Puzzle> dfs_spec(Puzzle &u, size_t &nodes_explored)
 	}
 
 	// no solution in recursive tree
+	return std::nullopt;
+}
+
+std::optional<Puzzle> dfs_stack(Puzzle &u, size_t &nodes_explored)
+{
+	std::list<Puzzle> s;
+	std::unordered_set<Puzzle> seen;
+
+	s.push_back(u);
+	seen.insert(u);
+
+	while (!s.empty())
+	{
+		nodes_explored++;
+		Puzzle v = s.back();
+		s.pop_back();
+
+		if (!v.is_valid())
+			throw invalid_puzzle_error(v);
+
+		if (v.is_complete())
+			return v;
+
+		for (auto w : v.get_neighbours())
+			if (!seen.count(w))
+			{
+				s.push_back(w);
+				seen.insert(w);
+			}
+	}
+
 	return std::nullopt;
 }
 
@@ -144,10 +172,10 @@ std::optional<Puzzle> bfs(Puzzle &u, size_t &nodes_explored)
 
 		// invalid puzzles shouldn't be passed to this function
 		if (!v.is_valid())
-			throw std::runtime_error("Couldn't solve invalid puzzle!");
+			throw invalid_puzzle_error(u);
 
 		// already checked the puzzle is valid, so if it's full we're done
-		if (v.is_full())
+		if (v.is_complete())
 			return v;
 
 		// enqueue neighbours for searching
@@ -184,10 +212,10 @@ std::optional<Puzzle> bfs_tracked(Puzzle &u, size_t &nodes_explored)
 
 		// invalid puzzles shouldn't be passed to this function
 		if (!v.is_valid())
-			throw std::runtime_error("Couldn't solve invalid puzzle!");
+			throw invalid_puzzle_error(u);
 
 		// already checked the puzzle is valid, so if it's full we're done
-		if (v.is_full())
+		if (v.is_complete())
 			return v;
 
 		// enqueue neighbours for searching
@@ -208,6 +236,8 @@ std::optional<Puzzle> solve(Puzzle &u, std::string alg, size_t &nodes_explored)
 		return dfs(u, nodes_explored);
 	else if (alg == "dfs_spec")
 		return dfs_spec(u, nodes_explored);
+	else if (alg == "dfs_stack")
+		return dfs_stack(u, nodes_explored);
 	else if (alg == "dfs_tracked")
 	{
 		std::unordered_set<Puzzle> seen;

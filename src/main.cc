@@ -18,8 +18,9 @@
 static void print_usage(const char *prog)
 {
 	std::cerr << "Usage:\n"
-			  << "  " << prog << " test <alg> <test_number>  -- test alg against tests/inputs/input<N> and tests/outputs/output<N>\n"
-			  << "  " << prog << " run  <alg> [file_path]    -- run alg on a puzzle from file_path, or stdin if omitted\n";
+			  << "  " << prog << " test  <alg> <test_number>       -- test alg against tests/inputs/input<N> and tests/outputs/output<N>\n"
+			  << "  " << prog << " run   <alg> [file_path]         -- run alg on a puzzle from file_path, or stdin if omitted\n"
+			  << "  " << prog << " check <puzzle_path> <soln_path>  -- check whether soln_path is a valid solution to the puzzle in puzzle_path\n";
 }
 
 /// @brief Run an algorithm on a puzzle read from `stream`, print the result.
@@ -28,7 +29,7 @@ static void run_mode(const std::string &alg, std::istream &stream)
 	Puzzle puzzle = Puzzle::from_stream(stream);
 
 	if (!puzzle.is_valid())
-		throw std::runtime_error("The puzzle is invalid!");
+		throw invalid_puzzle_error(puzzle);
 
 	std::cout << "Solving puzzle using " << alg << "...\n";
 
@@ -97,9 +98,35 @@ static void test_mode(const std::string &alg, int test_number)
 	}
 }
 
+/// @brief Check whether the puzzle in `soln_path` is a valid solution to the puzzle in `puzzle_path`.
+static void check_mode(const std::string &puzzle_path, const std::string &soln_path)
+{
+	std::ifstream puzzle_file(puzzle_path);
+	if (!puzzle_file.is_open())
+		throw std::runtime_error("Could not open puzzle file: " + puzzle_path);
+
+	std::ifstream soln_file(soln_path);
+	if (!soln_file.is_open())
+		throw std::runtime_error("Could not open solution file: " + soln_path);
+
+	Puzzle puzzle = Puzzle::from_stream(puzzle_file);
+	Puzzle soln = Puzzle::from_stream(soln_file);
+
+	if (puzzle.solved_by(soln))
+	{
+		std::cout << "PASS: " << soln_path << " is a valid solution to " << puzzle_path << "." << std::endl;
+	}
+	else
+	{
+		std::cout << "FAIL: " << soln_path << " is NOT a valid solution to " << puzzle_path << "." << std::endl;
+		throw std::runtime_error("Solution check failed.");
+	}
+}
+
 /// @brief Program entry point.
 int main(int argc, char **argv)
 {
+
 	if (argc < 3)
 	{
 		print_usage(argv[0]);
@@ -153,6 +180,19 @@ int main(int argc, char **argv)
 			print_usage(argv[0]);
 			return 1;
 		}
+	}
+	else if (subcommand == "check")
+	{
+		if (argc != 4)
+		{
+			std::cerr << "Error: 'check' requires exactly two arguments: <puzzle_path> <soln_path>\n";
+			print_usage(argv[0]);
+			return 1;
+		}
+
+		const std::string puzzle_path = argv[2];
+		const std::string soln_path = argv[3];
+		check_mode(puzzle_path, soln_path);
 	}
 	else
 	{
