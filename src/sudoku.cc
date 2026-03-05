@@ -1,5 +1,6 @@
-/*
- * C++ Sudoku solver
+/*!
+ * @file sudoku.cc
+ * @brief Implements methods declared in `sudoku.hh`.
  *
  * Copyright Finley Owen, 2026. All rights reserved.
  */
@@ -28,7 +29,9 @@ void Cell::set_intval(int value)
 		throw std::runtime_error("Invalid value!");
 }
 
-// ─── Puzzle ──────────────────────────────────────────────────────────────────
+// =============================================================================
+// Puzzle
+// =============================================================================
 
 Puzzle::Puzzle(Cell cells[NCELLS][NCELLS])
 {

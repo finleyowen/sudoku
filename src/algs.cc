@@ -1,5 +1,6 @@
-/*
- * C++ Sudoku solver
+/*!
+ * @file algs.cc
+ * @brief Implements algorithms declared in `algs.hh`.
  *
  * Copyright Finley Owen, 2026. All rights reserved.
  */

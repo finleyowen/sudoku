@@ -26,8 +26,10 @@ Note the [Makefile](./Makefile) is setup to compile using `g++`. Either ensure y
 
 - Build the executable: `make`
 - Build and run the executable: `make run_[alg]` where `alg` is either `bfs`, `dfs`, `bfs_tracked`, or `dfs_tracked`
-- Build and run the executable through Valgrind: `make valgrind` (requires [Valgrind](https://valgrind.org/))
-- Build the API docs: `make docs` (requires [Doxygen](https://www.doxygen.nl/); find output in `docs` directory)
+- Build and run the executable through Valgrind: `make valgrind_[alg]` (requires [Valgrind](https://valgrind.org/))
+- Build the API docs: `make doc` (requires [Doxygen](https://www.doxygen.nl/); find output in `docs` directory)
+
+You can also `make clean` to remove the object files, executable, and docs if they are built.
 
 ## Copyright notice
 

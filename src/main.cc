@@ -1,5 +1,6 @@
-/*
- * C++ Sudoku solver
+/*!
+ * @file main.cc
+ * @brief Program entry point.
  *
  * Copyright Finley Owen, 2026. All rights reserved.
  */

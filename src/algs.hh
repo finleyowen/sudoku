@@ -1,5 +1,6 @@
-/*
- * C++ Sudoku solver
+/*!
+ * @file algs.hh
+ * @brief Function prototypes for sudoku solving algorithms.
  *
  * Copyright Finley Owen, 2026. All rights reserved.
  */

@@ -1,9 +1,9 @@
-/*
- * C++ Sudoku solver
+/*!
+ * @file sudoku.hh
+ * @brief Declares classes and methods for representing Sudoku puzzle states.
  *
  * Copyright Finley Owen, 2026. All rights reserved.
  */
-
 #pragma once
 
 #include <cstring>
