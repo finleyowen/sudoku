@@ -68,11 +68,11 @@ public:
 
 	/// @brief Gets the value as an integer.
 	/// @return The value as an integer.
-	int get_intval() const;
+	u_int8_t get_intval() const;
 
 	/// @brief Set the value given an integer.
 	/// @param value The new value as an integer
-	void set_intval(int value);
+	void set_intval(u_int8_t value);
 
 	bool operator==(Cell other);
 };

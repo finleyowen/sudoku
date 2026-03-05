@@ -12,6 +12,8 @@
 #include <string>
 #include <unordered_set>
 
+#define NALGS 6
+
 /// @brief Solve a puzzle using recursive DFS.
 /// @param u The puzzle to solve (the source node in the DFS).
 /// @param nodes_explored The number of nodes explored.

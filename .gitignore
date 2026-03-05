@@ -1,5 +1,5 @@
 # executables and object files
-bin/**/*
+sudoku
 obj/**/*
 
 # docs

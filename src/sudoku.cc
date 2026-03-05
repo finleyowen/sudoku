@@ -16,12 +16,12 @@ bool Cell::is_empty()
 	return value == CellValue::UNSET;
 }
 
-int Cell::get_intval() const
+u_int8_t Cell::get_intval() const
 {
 	return static_cast<int>(value);
 }
 
-void Cell::set_intval(int value)
+void Cell::set_intval(u_int8_t value)
 {
 	if (value >= 0 && value <= NCELLS)
 		this->value = static_cast<CellValue>(value);
@@ -52,7 +52,7 @@ Puzzle::Puzzle(Cell cells[NCELLS][NCELLS])
 
 bool Puzzle::validate_row(int i)
 {
-	std::unordered_set<int> vals;
+	std::unordered_set<u_int8_t> vals;
 
 	for (int j = 0; j < NCELLS; j++)
 	{

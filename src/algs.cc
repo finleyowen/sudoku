@@ -80,7 +80,6 @@ std::optional<Puzzle> dfs_tracked(Puzzle &u,
 
 std::optional<Puzzle> dfs_spec(Puzzle &u, size_t &nodes_explored)
 {
-	std::cout << "Running dfs_spec!\n";
 
 	// increment nodes_explored
 	nodes_explored++;
