@@ -13,19 +13,22 @@
 #include <unordered_set>
 #include <vector>
 #include <list>
+#include <optional>
 
 /// @brief The number of cells in each row and each column
 #define NCELLS 9
-
-/// @brief Number of tests puzzles in the tests folder
-#define NTESTS 5 // uncomment to run tests 1-5 only
-// #define NTESTS 7 // uncomment run all tests
 
 /// @brief End of the first third of the puzzle
 #define T1 3
 
 /// @brief End of the second third of the puzzle
 #define T2 6
+
+/// @brief Number of sub-grids that form the main grid
+#define NSUBGRIDS 3
+
+/// @brief Number of cells in each sub-grid
+#define SUBGRID_SIZE 3
 
 /// @brief The bounds of the subgrids; simply expands out to `{0, 3, 6, 9}`.
 constexpr int subgrid_bounds[] = {0, T1, T2, NCELLS};
@@ -118,7 +121,21 @@ public:
 	/// @param q The queue to append the neighbouring nodes to.
 	void enqueue_neighbours(std::list<Puzzle> &q);
 
-	bool operator==(const Puzzle &other) const;
+	/// @brief Get a set of values that could not validly go into the cell in
+	///		row `i` and column `j`.
+	/// @param i Row index of the cell.
+	/// @param j Column index of the cell.
+	/// @return A set values that cannot be validly placed in the cell given
+	/// 	the current puzzle state.
+	std::unordered_set<int> get_invalid(int i, int j);
+
+	/// @brief Get a puzzle state that is guaranteed to be closer to solved than
+	///		this one assuming this one is valid and solvable.
+	/// @return
+	std::optional<Puzzle> get_next_state();
+
+	bool
+	operator==(const Puzzle &other) const;
 };
 
 // implement a hash function for the Puzzle class so we can store it in an

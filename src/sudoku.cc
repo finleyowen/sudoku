@@ -166,8 +166,8 @@ bool Puzzle::is_valid()
 			return false;
 
 	// check each 3x3 subgrid
-	for (int i = 0; i < 3; i++)
-		for (int j = 0; j < 3; j++)
+	for (int i = 0; i < NSUBGRIDS; i++)
+		for (int j = 0; j < NSUBGRIDS; j++)
 			if (!validate_subgrid(subgrid_bounds[i], subgrid_bounds[i + 1],
 								  subgrid_bounds[j], subgrid_bounds[j + 1]))
 				return false;
@@ -201,6 +201,28 @@ std::vector<Puzzle> Puzzle::get_neighbours()
 	return neighbours;
 }
 
+std::optional<Puzzle> Puzzle::get_next_state()
+{
+	for (int i = 0; i < NCELLS; i++)
+		for (int j = 0; j < NCELLS; j++)
+		{
+			auto invalid = get_invalid(i, j);
+			if (invalid.size() == NCELLS - 1)
+			{
+				// only one value is valid in this cell; find it and add the
+				// corresponding puzzle state to the best moves
+				for (int k = 1; k <= NCELLS; k++)
+					if (!invalid.count(k))
+					{
+						Puzzle v = clone();
+						v.cells[i][j].set_intval(k);
+						return v;
+					}
+			}
+		}
+	return std::nullopt;
+}
+
 void Puzzle::enqueue_neighbours(std::list<Puzzle> &q)
 {
 	for (int i = 0; i < NCELLS; i++)
@@ -214,6 +236,33 @@ void Puzzle::enqueue_neighbours(std::list<Puzzle> &q)
 					if (neighbour.is_valid())
 						q.push_back(neighbour);
 				}
+}
+
+std::unordered_set<int> Puzzle::get_invalid(int i, int j)
+{
+	// set of values that cannot go in the cell
+	std::unordered_set<int> invalid;
+
+	// add the values in the same column and row
+	for (int k = 0; k < NCELLS; k++)
+	{
+		// value in the same column
+		if (k != i && !cells[k][j].is_empty())
+			invalid.insert(cells[k][j].get_intval());
+		// value in the same row
+		if (k != j && !cells[i][k].is_empty())
+			invalid.insert(cells[i][k].get_intval());
+	}
+
+	// add the values in the same 3x3 subgrid
+	for (auto x_bound : subgrid_bounds)
+		for (auto y_bound : subgrid_bounds)
+			for (int i = x_bound; i < x_bound + SUBGRID_SIZE; i++)
+				for (int j = y_bound; i < y_bound + SUBGRID_SIZE; i++)
+					if (!cells[i][j].is_empty())
+						invalid.insert(cells[i][j].get_intval());
+
+	return invalid;
 }
 
 bool Puzzle::operator==(const Puzzle &other) const

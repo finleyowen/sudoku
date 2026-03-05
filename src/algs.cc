@@ -78,6 +78,54 @@ std::optional<Puzzle> dfs_tracked(Puzzle &u,
 	return std::nullopt;
 }
 
+std::optional<Puzzle> dfs_spec(Puzzle &u, size_t &nodes_explored)
+{
+	std::cout << "Running dfs_spec!\n";
+
+	// increment nodes_explored
+	nodes_explored++;
+
+	// invalid puzzles shouldn't be passed to this function
+	if (!u.is_valid())
+		throw std::runtime_error("Couldn't solve invalid puzzle!");
+
+	// already checked the puzzle is valid, so if it's full we're done
+	if (u.is_full())
+		return u;
+
+	// =========================================================================
+	// optimisation: if there's a puzzle state v that is guaranteed to be closer
+	// to solved than the current puzzle state u assuming u is valid and
+	// solvable, replace u with v
+	std::optional<Puzzle> v = u;
+	while ((v = u.get_next_state()) != std::nullopt)
+	{
+		std::cout << "Found better state!\n";
+		u = *v;
+	}
+	// =========================================================================
+
+	std::cout << "Finished analysing better states\n";
+
+	// recursively solve the puzzle
+	auto neighbours = u.get_neighbours();
+
+	// base case: no neighbours => no solution
+	if (!neighbours.size())
+		return std::nullopt;
+
+	// recursive case: check if neighbours have solutions
+	for (auto v : neighbours)
+	{
+		auto soln = dfs(v, nodes_explored);
+		if (soln.has_value())
+			return soln;
+	}
+
+	// no solution in recursive tree
+	return std::nullopt;
+}
+
 std::optional<Puzzle> bfs(Puzzle &u, size_t &nodes_explored)
 {
 	// create the queue and add the source node
@@ -158,6 +206,8 @@ std::optional<Puzzle> solve(Puzzle &u, std::string alg, size_t &nodes_explored)
 		return bfs_tracked(u, nodes_explored);
 	else if (alg == "dfs")
 		return dfs(u, nodes_explored);
+	else if (alg == "dfs_spec")
+		return dfs_spec(u, nodes_explored);
 	else if (alg == "dfs_tracked")
 	{
 		std::unordered_set<Puzzle> seen;

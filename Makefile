@@ -1,8 +1,9 @@
+# Sudoku solver makefile
+
+# Copyright Finley Owen, 2026. All rights reserved.
+
 CXX = g++
 CXXFLAGS = -Wall
-
-VALGRIND = valgrind
-DOXYGEN = doxygen
 
 SRC_DIR = src
 OBJ_DIR = obj
@@ -20,30 +21,6 @@ $(EXE): $(OBJ)
 obj/%.o: src/%.cc
 	mkdir -p obj
 	$(CXX) $(CXXFLAGS) -c $< -o $@
-
-run_dfs: $(EXE)
-	$(EXE) dfs
-
-run_dfs_tracked: $(EXE)
-	$(EXE) dfs_tracked
-
-run_bfs: $(EXE)
-	$(EXE) bfs
-
-run_bfs_tracked: $(EXE)
-	$(EXE) bfs_tracked
-
-valgrind_dfs: $(EXE)
-	$(VALGRIND) $(EXE) dfs
-
-valgrind_dfs_tracked: $(EXE)
-	$(VALGRIND) $(EXE) dfs_tracked
-
-valgrind_bfs: $(EXE)
-	$(VALGRIND) $(EXE) bfs
-
-valgrind_bfs_tracked: $(EXE)
-	$(VALGRIND) $(EXE) bfs_tracked
 
 doc: $(SRC)
 	$(DOXYGEN) Doxyfile

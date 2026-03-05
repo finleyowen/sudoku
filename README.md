@@ -2,19 +2,23 @@
 
 A sudoku solver written in C++ using graphing algorithms on an implicit unweighted graph.
 
-**This project is under active development. It is currently working, however all the algorithms are extremely slow and none have been successfully executed on test 6 ([input](./tests/inputs/input6), [output](./tests/outputs/output6)) or test 7 ([input](./tests/inputs/), [output](./tests/outputs/output7)) yet for this reason. To attempt to run tests 6 and 7, changed the value of `NTESTS` from 5 to 7 in [sudoku.cpp](./src/sudoku.cpp).**
+**This project is under active development. It is currently working, however all the algorithms are extremely slow and none have been successfully executed on test 7 ([input](./tests/inputs/input7), [output](./tests/outputs/output7)) or test 8 ([input](./tests/inputs/input8), [output](./tests/outputs/output8)) yet for this reason.**
 
-## Overview
+## Overview and usage
 
-Currently, the program iterates over the test puzzles in the [test folder](./tests) and attempts solve them. The test folder contains the inputs (unsolved puzzles) and corresponding expected outputs (solved puzzles).  
+The algorithms currently implemented are:
+- `dfs` - depth-first search
+- `dfs_tracked` - depth-first search that avoids exploring duplicate states
+- `dfs_spec` - specialised depth-first search that only explores states that are guaranteed to be closer to the solution that the current state assuming the current state is valid and solvable
+- `bfs` - breadth-first search
+- `bfs_tracked` - breadth-first search that avoids exploring duplicate states
 
-The program throws a runtime error if any of the following occur:
-- Either the input or output don't exist or cannot be parsed into a puzzle (see below)
-- The algorithm fails to solve the puzzle, e.g., if the puzzle is impossible to solve
-- The algorithm solves the puzzle, but the solution is different from the expected solution.
+After building from source with `make`, there are two options for running the code:
+- `bin/sudoku test [alg] [test_number]` tests the algorithm `alg` on the input/output pair `tests/inputs/input[test_number]`, `tests/outputs/output[test_number]`.
+- `bin/sudoku run [alg] [file_path]` runs the algorithm `alg` on the incomplete puzzle stored at `file_path`. Outputs the solution to `std::cout` if one can be found.
+- `bin/sudoku run [alg]` runs the algorithm `alg` on an incomplete puzzle passed into `std::cin`. Outputs the solution to `std::cout` if one can be found.
 
-Puzzles are represented textually with columns separated by whitespaces and rows separated
-by newlines. Blank cells are represented using the character `x`. The puzzle must be preceded by a line beginning with a dash (`-`); everyhing before this line is a header comment describing the puzzle. See examples in the [test folder](./tests)
+Test puzzles are provided in the [tests](./tests/) folder. The incomplete puzzles are in the inputs subdirectory and the completed puzzles are in the outputs subdirectory.
 
 ## Documentation
 
